@@ -53,67 +53,78 @@
     </div>
 
     <script>
-        const API_KEY = 'AIzaSyDXbfCA2l6LWwg5iURIxbCPCbUlRLGlXWE'; 
-        const PLAYLIST_ID = 'PLpm1VVK4UL17x8mbfPIYWRjkCTlrqEWW5'; 
+        // YOUR DATA
+    const API_KEY = 'AIzaSyDXbfCA2l6LWwg5iURIxbCPCbUlRLGlXWE'; 
+    const PLAYLIST_ID = 'PLpm1VVK4UL17x8mbfPIYWRjkCTlrqEWW5'; 
 
-        async function fetchPlaylist() {
-            const grid = document.getElementById('animeGrid');
-            try {
-                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?key=${API_KEY}&playlistId=${PLAYLIST_ID}&part=snippet&maxResults=50`);
-                const data = await response.json();
+    async function fetchPlaylist() {
+        const grid = document.getElementById('animeGrid');
+        try {
+            const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?key=${API_KEY}&playlistId=${PLAYLIST_ID}&part=snippet&maxResults=50`);
+            const data = await response.json();
 
-                if (data.error) {
-                    alert("API Error: " + data.error.message);
-                    return;
-                }
-
-                if (data.items) {
-                    grid.innerHTML = data.items.map(item => {
-                        const videoId = item.snippet.resourceId.videoId;
-                        const title = item.snippet.title;
-                        
-                        // SAFETY FIX: Check if thumbnail exists, otherwise use a placeholder image
-                        let thumb = "https://via.placeholder.com/300x450?text=No+Thumbnail";
-                        if (item.snippet.thumbnails && item.snippet.thumbnails.high) {
-                            thumb = item.snippet.thumbnails.high.url;
-                        } else if (item.snippet.thumbnails && item.snippet.thumbnails.default) {
-                            thumb = item.snippet.thumbnails.default.url;
-                        }
-
-                        // Skip deleted or private videos (their title usually starts with "Deleted video" or "Private video")
-                        if (title === "Deleted video" || title === "Private video") {
-                            return ""; 
-                        }
-
-                        return `
-                            <div class="anime-card" onclick="openPlayer('${videoId}')">
-                                <img src="${thumb}" alt="Anime Episode">
-                                <div class="card-info">
-                                    <h3>${title}</h3>
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                }
-            } catch (error) {
-                alert("Connection Failed: " + error);
+            if (data.error) {
+                console.error("API Error:", data.error.message);
+                grid.innerHTML = `<p style="color:red">API Error: ${data.error.message}</p>`;
+                return;
             }
+
+            if (data.items) {
+                // We use .filter first to remove any videos that don't have a proper title or ID
+                const validItems = data.items.filter(item => {
+                    const title = item.snippet?.title || "";
+                    return title !== "Private video" && title !== "Deleted video";
+                });
+
+                grid.innerHTML = validItems.map(item => {
+                    const videoId = item.snippet?.resourceId?.videoId;
+                    const title = item.snippet?.title || "No Title Available";
+                    
+                    // SAFE THUMBNAIL LOGIC
+                    // We try to get 'high', then 'medium', then 'default'. 
+                    // If all fail, we use a placeholder image link.
+                    const thumb = item.snippet?.thumbnails?.high?.url || 
+                                  item.snippet?.thumbnails?.medium?.url || 
+                                  item.snippet?.thumbnails?.default?.url || 
+                                  "https://via.placeholder.com/300x450?text=No+Thumbnail";
+
+                    return `
+                        <div class="anime-card" onclick="openPlayer('${videoId}', '${title.replace(/'/g, "&apos;")}')">
+                            <img src="${thumb}" alt="Thumbnail" onerror="this.src='https://via.placeholder.com/300x450?text=Image+Error'">
+                            <div class="card-info">
+                                <h3>${title}</h3>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (error) {
+            console.error("Connection error:", error);
+            grid.innerHTML = `<p style="color:red">Connection Failed. Please check internet or API Key.</p>`;
         }
+    }
 
-        const modal = document.getElementById('videoModal');
-        const player = document.getElementById('videoPlayer');
+    const modal = document.getElementById('videoModal');
+    const player = document.getElementById('videoPlayer');
 
-        function openPlayer(id) {
-            player.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
-            modal.style.display = 'flex';
-        }
+    function openPlayer(id, title) {
+        if (!id) return; // Don't open if ID is missing
+        player.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
+        const vTitle = document.getElementById('videoTitle');
+        if (vTitle) vTitle.innerText = title;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
 
-        function closePlayer() {
-            player.src = "";
-            modal.style.display = 'none';
-        }
+    function closePlayer() {
+        player.src = "";
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }
 
-        window.onload = fetchPlaylist;
+    window.onclick = (e) => { if (e.target == modal) closePlayer(); }
+
+    window.onload = fetchPlaylist;
     </script>
 </body>
 </html>
