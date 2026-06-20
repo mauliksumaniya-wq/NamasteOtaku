@@ -3,55 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NamasteOtaku | Official Anime Library</title>
+    <title>NamasteOtaku | Premium Library</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #ff9933; --bg: #0a0a0b; --card: #16171a; }
+        :root { --primary: #ff9933; --bg: #0a0a0b; --card: #16171a; --text: #ffffff; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-        body { background-color: var(--bg); color: white; overflow-x: hidden; }
+        body { background-color: var(--bg); color: var(--text); overflow-x: hidden; }
 
+        /* --- NAV --- */
         nav { padding: 15px 6%; background: #000; border-bottom: 1px solid #333; display: flex; justify-content: space-between; position: sticky; top: 0; z-index: 1000; }
-        .logo { font-size: 24px; font-weight: 800; text-decoration: none; color: white; cursor: pointer; }
+        .logo { font-size: 24px; font-weight: 800; color: white; text-decoration: none; cursor: pointer; }
         .logo span { color: var(--primary); }
 
         main { padding: 20px 6%; min-height: 80vh; }
-        .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .page-title { font-size: 1.6rem; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
         #backBtn { background: var(--primary); color: black; border: none; padding: 8px 18px; border-radius: 5px; font-weight: 800; cursor: pointer; display: none; }
 
-        /* LIBRARY GRID */
+        /* --- LIBRARY VIEW --- */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
-        .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #222; cursor: pointer; height: 260px; position: relative; }
+        .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #222; cursor: pointer; transition: 0.3s; height: 260px; position: relative; }
         .card img { width: 100%; height: 100%; object-fit: cover; }
-        .card .info { padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,1)); position: absolute; bottom: 0; width: 100%; text-align: center; }
+        .card .info { padding: 12px; background: linear-gradient(transparent, rgba(0,0,0,1)); position: absolute; bottom: 0; width: 100%; text-align: center; }
+        .card h3 { font-size: 14px; text-shadow: 1px 1px 5px #000; }
 
-        /* EPISODE LIST */
-        .ep-grid { display: none; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
+        /* --- EPISODE VIEW --- */
+        .ep-grid { display: none; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 15px; }
         .ep-card { background: var(--card); border-radius: 10px; overflow: hidden; border: 1px solid #333; cursor: pointer; transition: 0.2s; }
         .ep-card:hover { border-color: var(--primary); }
-        .ep-card img { width: 100%; height: 120px; object-fit: cover; }
-        .ep-card p { padding: 10px; font-size: 12px; color: #ccc; }
+        .ep-card img { width: 100%; height: 110px; object-fit: cover; }
+        .ep-card p { padding: 10px; font-size: 12px; color: #ccc; line-height: 1.4; height: 50px; overflow: hidden; }
 
-        /* PLAYER - SKIP BUTTON FRIENDLY */
+        /* --- THE ANTI-YOUTUBE PLAYER --- */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; flex-direction: column; justify-content: center; align-items: center; }
-        .video-box { 
-            width: 100%; max-width: 900px; 
-            aspect-ratio: 16/9; 
-            overflow: hidden; 
-            position: relative; 
-            background: #000;
+        .player-wrapper { 
+            width: 100%; max-width: 900px; aspect-ratio: 16/9; 
+            overflow: hidden; position: relative; background: #000;
         }
-
         #mainPlayer {
             position: absolute;
-            top: -10%;    /* ऊपर का टाइटल छुपाने के लिए */
+            top: -12%;    /* Title/Logo को ऊपर धकेलता है */
             left: 0;
             width: 100%;  
-            height: 110%; /* नीचे का हिस्सा खुला रखा है ताकि 'Skip Ad' बटन दिखे */
+            height: 115%; /* Bottom Controls और Skip Ad को बचाए रखता है */
             border: none;
         }
+        .click-shield { position: absolute; top: 0; left: 0; width: 80%; height: 85%; z-index: 10; background: transparent; }
+        .close-btn { margin-top: 30px; color: #666; cursor: pointer; font-weight: 800; border: 1px solid #333; padding: 10px 40px; border-radius: 50px; }
 
-        .close-p { margin-top: 30px; color: #666; cursor: pointer; font-weight: 800; border: 1px solid #333; padding: 10px 40px; border-radius: 50px; }
-        .close-p:hover { color: white; border-color: white; }
+        @media (max-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; } }
     </style>
 </head>
 <body>
@@ -61,34 +60,39 @@
     </nav>
 
     <main>
-        <div class="page-header">
-            <h2 id="titleText">Featured Anime</h2>
-            <button id="backBtn" onclick="location.reload()">← Back</button>
+        <div class="page-title">
+            <span id="headerText">Discover Anime</span>
+            <button id="backBtn" onclick="showLibrary()">← Back</button>
         </div>
         
-        <div id="libraryGrid" class="grid"><p>Loading library...</p></div>
+        <div id="libraryGrid" class="grid">
+            <p style="grid-column: 1/-1; text-align: center; color: gray;">Loading library...</p>
+        </div>
+        
         <div id="episodeGrid" class="ep-grid"></div>
     </main>
 
     <div class="modal" id="videoModal">
-        <div class="video-box">
-            <iframe id="mainPlayer" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        <div class="player-wrapper">
+            <div class="click-shield"></div> <!-- Stops users from clicking out -->
+            <iframe id="mainPlayer" src="" allow="autoplay; fullscreen"></iframe>
         </div>
-        <div class="close-p" onclick="closePlayer()">CLOSE PLAYER</div>
+        <p style="color:#555; font-size: 10px; margin-top:15px;">Powered by Official YouTube Content</p>
+        <div class="close-btn" onclick="closePlayer()">CLOSE PLAYER</div>
     </div>
 
     <script>
-        const API_KEY = 'AIzaSyDXbfCA2l6LWwg5iURIxbCPCbUlRLGlXWE'; 
+        const YT_KEY = 'AIzaSyDXbfCA2l6LWwg5iURIxbCPCbUlRLGlXWE'; 
 
-        // अपना एनिमी डेटाबेस
         const animeDB = [
             { name: "Classroom of the Elite", id: "PLpm1VVK4UL17x8mbfPIYWRjkCTlrqEWW5" },
             { name: "Solo Leveling", id: "PLpm1VVK4UL15W7yE6yL1G_XzE7fWpE_L8" },
-            { name: "Demon Slayer", id: "PLpm1VVK4UL15f_8uV_N3oA8_NqVf7X_r8" }
+            { name: "Demon Slayer", id: "PLpm1VVK4UL15f_8uV_N3oA8_NqVf7X_r8" },
+            { name: "Blue Lock", id: "PLpm1VVK4UL15H2X3Dnd89N2S0-9h-KkH-" }
         ];
 
-        // 1. लोड लाइब्रेरी
-        async function init() {
+        // 1. लोड लाइब्रेरी (Series List)
+        async function initLibrary() {
             const grid = document.getElementById('libraryGrid');
             grid.innerHTML = ""; 
 
@@ -104,62 +108,62 @@
                     card.innerHTML = `<img src="${poster}"><div class="info"><h3>${anime.name}</h3></div>`;
                     grid.appendChild(card);
                 } catch (e) {
-                    console.error("Poster failed for " + anime.name);
+                    console.error("Poster Error:", e);
                 }
             }
         }
 
-        // 2. लोड एपिसोड्स (IMPORTANT FIX)
+        // 2. लोड एपिसोड्स (Playlist Items) - FIXED LOGIC
         async function loadEpisodes(pid, name) {
             const lib = document.getElementById('libraryGrid');
             const ep = document.getElementById('episodeGrid');
-            const back = document.getElementById('backBtn');
-            const title = document.getElementById('titleText');
-
-            lib.style.display = 'none';
-            ep.style.display = 'grid';
-            back.style.display = 'block';
-            title.innerText = name;
-            ep.innerHTML = "<p>Loading episodes from YouTube...</p>";
+            
+            lib.style.display = "none";
+            ep.style.display = "grid";
+            document.getElementById('backBtn').style.display = "block";
+            document.getElementById('headerText').innerText = name;
+            
+            ep.innerHTML = "<p style='grid-column: 1/-1; text-align: center;'>Fetching episodes...</p>";
 
             try {
-                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?key=${API_KEY}&playlistId=${pid}&part=snippet&maxResults=50`);
+                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?key=${YT_KEY}&playlistId=${pid}&part=snippet&maxResults=50`);
                 const data = await response.json();
-
-                if (data.error) {
-                    alert("YouTube API Error: " + data.error.message);
-                    ep.innerHTML = "<p>Error: Check API Key or Quota.</p>";
-                    return;
-                }
 
                 if (data.items && data.items.length > 0) {
                     ep.innerHTML = data.items.map(item => {
                         const vid = item.snippet.resourceId.videoId;
                         const epTitle = item.snippet.title;
-                        const thumb = item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url;
+                        const thumb = item.snippet.thumbnails?.medium?.url || item.snippet.thumbnails?.default?.url || "";
 
                         if (epTitle === "Private video" || epTitle === "Deleted video") return "";
 
                         return `
                             <div class="ep-card" onclick="openPlayer('${vid}')">
-                                <img src="${thumb}">
+                                <img src="${thumb}" alt="Episode">
                                 <p>${epTitle}</p>
-                            </div>`;
+                            </div>
+                        `;
                     }).join('');
                 } else {
-                    ep.innerHTML = "<p>No episodes found in this playlist.</p>";
+                    ep.innerHTML = "<p>No episodes found or API Error.</p>";
                 }
             } catch (err) {
-                ep.innerHTML = "<p>Connection error. Try again.</p>";
+                ep.innerHTML = "<p>Connection error. Refresh the page.</p>";
             }
         }
 
-        // 3. प्लेयर फंक्शन
+        function showLibrary() {
+            document.getElementById('libraryGrid').style.display = "grid";
+            document.getElementById('episodeGrid').style.display = "none";
+            document.getElementById('backBtn').style.display = "none";
+            document.getElementById('headerText').innerText = "Discover Anime";
+        }
+
+        // 3. प्लेयर फंक्शन - MASKED FOR APP FEEL
         function openPlayer(id) {
-            // modestbranding=1 : लोगो छुपाता है
-            // controls=1 : बहुत जरूरी है ताकि 'Skip Ad' बटन काम करे
-            const playerUrl = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&controls=1&iv_load_policy=3`;
-            document.getElementById('mainPlayer').src = playerUrl;
+            const player = document.getElementById('mainPlayer');
+            // parameters used to hide suggested videos and branding
+            player.src = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&controls=1`;
             document.getElementById('videoModal').style.display = 'flex';
         }
 
@@ -168,7 +172,7 @@
             document.getElementById('videoModal').style.display = 'none';
         }
 
-        window.onload = init;
+        window.onload = initLibrary;
     </script>
 </body>
 </html>
