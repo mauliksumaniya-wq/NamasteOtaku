@@ -3,14 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NamasteOtaku | Pro Anime Library</title>
+    <title>NamasteOtaku | Premium Anime</title>
+    
+    <!-- Plyr CSS for professional UI -->
+    <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --primary: #ff9933; --bg: #0a0a0b; --card: #16171a; }
+        :root { --primary: #ff9933; --bg: #0a0a0b; --card: #16171a; --plyr-color-main: #ff9933; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-        body { background-color: var(--bg); color: white; overflow-x: hidden; }
+        body { background-color: var(--bg); color: white; }
 
-        /* --- NAV --- */
+        /* --- NAVIGATION --- */
         nav { padding: 15px 6%; background: #000; border-bottom: 1px solid #333; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; }
         .logo { font-size: 24px; font-weight: 800; color: white; text-decoration: none; cursor: pointer; }
         .logo span { color: var(--primary); }
@@ -19,50 +23,27 @@
         .page-title { font-size: 1.8rem; margin-bottom: 25px; display: flex; align-items: center; justify-content: space-between; }
         #backBtn { background: var(--primary); color: black; border: none; padding: 8px 18px; border-radius: 5px; font-weight: 800; cursor: pointer; display: none; }
 
-        /* --- LIBRARY VIEW (POSTERS) --- */
+        /* --- POSTER GRID --- */
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
         .anime-card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #222; cursor: pointer; transition: 0.3s; position: relative; height: 260px; }
         .anime-card:hover { border-color: var(--primary); transform: scale(1.03); }
         .anime-card img { width: 100%; height: 100%; object-fit: cover; }
         .anime-card .info { padding: 10px; background: linear-gradient(transparent, rgba(0,0,0,1)); position: absolute; bottom: 0; width: 100%; text-align: center; }
-        .anime-card h3 { font-size: 14px; text-shadow: 1px 1px 3px black; }
 
-        /* --- EPISODE VIEW (LIST) --- */
+        /* --- EPISODE GRID --- */
         .ep-grid { display: none; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; }
         .ep-card { background: var(--card); border-radius: 10px; overflow: hidden; border: 1px solid #333; cursor: pointer; }
         .ep-card img { width: 100%; height: 120px; object-fit: cover; }
         .ep-card p { padding: 10px; font-size: 12px; color: #ccc; }
 
-        /* --- PLAYER MODAL (CHROMELESS TRICK) --- */
+        /* --- PLAYER MODAL --- */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; flex-direction: column; justify-content: center; align-items: center; }
+        .player-container { width: 95%; max-width: 900px; border-radius: 10px; overflow: hidden; background: #000; }
         
-        /* The container hides the "cropped" edges of YouTube */
-        .player-box { 
-            width: 95%; max-width: 900px; 
-            aspect-ratio: 16/9; 
-            overflow: hidden; 
-            position: relative; 
-            background: #000; 
-            border-radius: 10px;
-        }
-
-        /* Scale and move video to hide Logo and Title */
-        #videoPlayer {
-            position: absolute;
-            top: -10%; /* Hides Title */
-            left: -5%;
-            width: 110%; /* Stretches to hide watermark */
-            height: 120%;
-        }
-
-        .player-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 80px; z-index: 10; cursor: default; }
+        /* Hiding the YouTube Title inside Plyr */
+        .plyr__video-embed iframe { transform: scale(1.15); } 
 
         .close-btn { margin-top: 30px; color: #666; font-weight: 800; cursor: pointer; border: 1px solid #333; padding: 10px 30px; border-radius: 50px; }
-        .close-btn:hover { color: white; border-color: white; }
-
-        @media (max-width: 600px) {
-            .grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        }
     </style>
 </head>
 <body>
@@ -76,109 +57,87 @@
             <span id="headerText">Discover Anime</span>
             <button id="backBtn" onclick="showLibrary()">← Back</button>
         </div>
-
-        <!-- Section 1: Library of Posters -->
-        <div id="libraryGrid" class="grid">
-            <p>Loading library...</p>
-        </div>
-
-        <!-- Section 2: List of Episodes -->
+        <div id="libraryGrid" class="grid"><p>Loading library...</p></div>
         <div id="episodeGrid" class="ep-grid"></div>
     </main>
 
-    <!-- Professional Player -->
+    <!-- Professional Player Modal -->
     <div class="modal" id="videoModal">
-        <div class="player-box">
-            <div class="player-overlay"></div> <!-- Blocks YouTube Link clicks -->
-            <iframe id="videoPlayer" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+        <div class="player-container">
+            <div id="player" data-plyr-provider="youtube" data-plyr-embed-id=""></div>
         </div>
         <div class="close-btn" onclick="closePlayer()">CLOSE PLAYER</div>
     </div>
 
+    <!-- Plyr JS -->
+    <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+
     <script>
         const YT_KEY = 'AIzaSyDXbfCA2l6LWwg5iURIxbCPCbUlRLGlXWE'; 
-
         const animeDB = [
             { name: "Classroom of the Elite", id: "PLpm1VVK4UL17x8mbfPIYWRjkCTlrqEWW5" },
             { name: "Solo Leveling", id: "PLpm1VVK4UL15W7yE6yL1G_XzE7fWpE_L8" },
             { name: "Demon Slayer", id: "PLpm1VVK4UL15f_8uV_N3oA8_NqVf7X_r8" }
         ];
 
-        const libGrid = document.getElementById('libraryGrid');
-        const epGrid = document.getElementById('episodeGrid');
-        const headerText = document.getElementById('headerText');
-        const backBtn = document.getElementById('backBtn');
+        // Initialize Plyr
+        const player = new Plyr('#player', {
+            controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen'],
+            settings: ['quality', 'speed'],
+            youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
+        });
 
-        // --- 1. Load the Library (Posters) ---
         async function loadLibrary() {
+            const libGrid = document.getElementById('libraryGrid');
             libGrid.innerHTML = "";
             for (const anime of animeDB) {
-                try {
-                    // Fetch high-quality posters from Jikan API
-                    const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(anime.name)}&limit=1`);
-                    const data = await res.json();
-                    const poster = data.data[0]?.images?.webp?.large_image_url || "https://via.placeholder.com/300x450";
+                const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(anime.name)}&limit=1`);
+                const data = await res.json();
+                const poster = data.data[0]?.images?.webp?.large_image_url;
 
-                    const card = document.createElement('div');
-                    card.className = 'anime-card';
-                    card.onclick = () => loadEpisodes(anime.id, anime.name);
-                    card.innerHTML = `<img src="${poster}"><div class="info"><h3>${anime.name}</h3></div>`;
-                    libGrid.appendChild(card);
-                } catch (e) { console.log("Poster error for " + anime.name); }
+                const card = document.createElement('div');
+                card.className = 'anime-card';
+                card.onclick = () => loadEpisodes(anime.id, anime.name);
+                card.innerHTML = `<img src="${poster}"><div class="info"><h3>${anime.name}</h3></div>`;
+                libGrid.appendChild(card);
             }
         }
 
-        // --- 2. Load the Episodes for the selected Anime ---
         async function loadEpisodes(playlistId, animeName) {
-            libGrid.style.display = "none";
+            document.getElementById('libraryGrid').style.display = "none";
+            const epGrid = document.getElementById('episodeGrid');
             epGrid.style.display = "grid";
-            backBtn.style.display = "block";
-            headerText.innerText = animeName;
-            epGrid.innerHTML = "<p>Loading episodes...</p>";
+            document.getElementById('backBtn').style.display = "block";
+            document.getElementById('headerText').innerText = animeName;
+            epGrid.innerHTML = "Loading...";
 
-            try {
-                const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?key=${YT_KEY}&playlistId=${playlistId}&part=snippet&maxResults=50`);
-                const data = await response.json();
+            const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?key=${YT_KEY}&playlistId=${playlistId}&part=snippet&maxResults=50`);
+            const data = await response.json();
 
-                if (data.items) {
-                    epGrid.innerHTML = data.items.map(item => {
-                        const videoId = item.snippet.resourceId.videoId;
-                        const title = item.snippet.title;
-                        const thumb = item.snippet?.thumbnails?.high?.url || item.snippet?.thumbnails?.default?.url;
-                        
-                        if (title === "Private video" || title === "Deleted video") return "";
-
-                        return `
-                            <div class="ep-card" onclick="openPlayer('${videoId}')">
-                                <img src="${thumb}" alt="Episode">
-                                <p>${title}</p>
-                            </div>
-                        `;
-                    }).join('');
-                }
-            } catch (error) {
-                epGrid.innerHTML = "<p>Error loading episodes. Please check your internet.</p>";
-            }
+            epGrid.innerHTML = data.items.map(item => {
+                const vid = item.snippet.resourceId.videoId;
+                const title = item.snippet.title;
+                const thumb = item.snippet.thumbnails.medium.url;
+                if (title === "Private video") return "";
+                return `<div class="ep-card" onclick="openPlayer('${vid}')"><img src="${thumb}"><p>${title}</p></div>`;
+            }).join('');
         }
 
-        // --- 3. View Management ---
         function showLibrary() {
-            libGrid.style.display = "grid";
-            epGrid.style.display = "none";
-            backBtn.style.display = "none";
-            headerText.innerText = "Discover Anime";
+            document.getElementById('libraryGrid').style.display = "grid";
+            document.getElementById('episodeGrid').style.display = "none";
+            document.getElementById('backBtn').style.display = "none";
+            document.getElementById('headerText').innerText = "Discover Anime";
         }
 
-        // --- 4. Player Logic ---
         function openPlayer(id) {
-            const player = document.getElementById('videoPlayer');
-            // parameters: modestbranding=1 (hides logo), rel=0 (no suggested videos)
-            player.src = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&iv_load_policy=3&controls=1`;
+            player.source = { type: 'video', sources: [{ src: id, provider: 'youtube' }] };
             document.getElementById('videoModal').style.display = 'flex';
+            player.play();
         }
 
         function closePlayer() {
-            document.getElementById('videoPlayer').src = "";
+            player.stop();
             document.getElementById('videoModal').style.display = 'none';
         }
 
