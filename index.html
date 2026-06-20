@@ -3,104 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NamasteOtaku | Classroom of the Elite Hindi Dub</title>
+    <title>NamasteOtaku | Classroom of the Elite</title>
     
-    <!-- PWA Settings -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ff9933">
-    
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&family=Noto+Sans+Devanagari:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --primary: #ff9933; 
-            --bg-black: #0a0a0b;
-            --card-bg: #16171a;
-            --text-white: #ffffff;
-            --text-gray: #a0a0a0;
-        }
-
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', 'Noto Sans Devanagari', sans-serif; }
-        body { background-color: var(--bg-black); color: var(--text-white); overflow-x: hidden; }
-
-        /* --- NAVIGATION --- */
-        nav {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 6%; background: rgba(10, 10, 11, 0.98);
-            backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .logo { font-size: 24px; font-weight: 800; text-decoration: none; color: white; letter-spacing: -1px; }
+        :root { --primary: #ff9933; --bg-black: #0a0a0b; --card-bg: #16171a; --text-white: #ffffff; }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: var(--bg-black); color: var(--text-white); }
+        nav { padding: 15px 6%; background: #000; border-bottom: 1px solid #333; display: flex; justify-content: space-between; }
+        .logo { font-size: 24px; font-weight: 800; text-decoration: none; color: white; }
         .logo span { color: var(--primary); }
-        .nav-links a { color: var(--text-white); text-decoration: none; font-weight: 600; font-size: 14px; margin-left: 20px; }
-
-        /* --- HERO SECTION --- */
-        .hero {
-            height: 40vh; display: flex; align-items: center; padding: 0 6%;
-            background: linear-gradient(to right, rgba(10,10,11,1) 20%, rgba(10,10,11,0.3)), 
-                        url('https://images8.alphacoders.com/133/1331713.png');
-            background-size: cover; background-position: center;
-        }
-        .hero-text h1 { font-size: clamp(2rem, 5vw, 3rem); line-height: 1.1; }
-        .hero-text p { color: var(--primary); font-weight: 700; margin-top: 10px; text-transform: uppercase; letter-spacing: 2px; }
-
-        /* --- MAIN CONTENT --- */
-        main { padding: 40px 6%; min-height: 60vh; }
-        .section-title { font-size: 1.5rem; margin-bottom: 30px; display: flex; align-items: center; gap: 15px; }
-        .section-title::after { content: ''; height: 1px; flex-grow: 1; background: rgba(255,255,255,0.1); }
-
-        .anime-grid {
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px;
-        }
-
-        .anime-card {
-            background: var(--card-bg); border-radius: 12px; overflow: hidden;
-            cursor: pointer; transition: 0.3s; border: 1px solid rgba(255,255,255,0.05);
-        }
-        .anime-card:hover { transform: scale(1.05); border-color: var(--primary); }
-        .anime-card img { width: 100%; height: 260px; object-fit: cover; }
+        main { padding: 40px 6%; }
+        .anime-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+        .anime-card { background: var(--card-bg); border-radius: 12px; overflow: hidden; border: 1px solid #222; cursor: pointer; transition: 0.3s; }
+        .anime-card:hover { border-color: var(--primary); transform: translateY(-5px); }
+        .anime-card img { width: 100%; height: 250px; object-fit: cover; background: #222; }
         .card-info { padding: 12px; }
-        .card-info h3 { font-size: 14px; color: white; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.4; }
-
-        /* --- MODAL PLAYER --- */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.96); z-index: 2000; justify-content: center; align-items: center;
-        }
+        .card-info h3 { font-size: 14px; color: white; height: 40px; overflow: hidden; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; justify-content: center; align-items: center; }
         .modal-container { width: 95%; max-width: 900px; position: relative; }
         .video-wrapper { position: relative; padding-top: 56.25%; background: #000; border-radius: 12px; overflow: hidden; }
         .video-wrapper iframe { position: absolute; top:0; left:0; width:100%; height:100%; border:none; }
         .close-modal { position: absolute; top: -50px; right: 0; color: white; font-size: 40px; cursor: pointer; }
-
-        footer { padding: 40px 6%; text-align: center; border-top: 1px solid rgba(255,255,255,0.05); color: var(--text-gray); font-size: 13px; }
-
-        @media (max-width: 600px) {
-            .hero { height: 30vh; }
-            .anime-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-        }
     </style>
 </head>
 <body>
 
     <nav>
         <a href="#" class="logo">NAMASTE<span>OTAKU</span></a>
-        <div class="nav-links">
-            <a href="#">HOME</a>
-        </div>
     </nav>
 
-    <header class="hero">
-        <div class="hero-text">
-            <h1>Classroom of <br>The Elite</h1>
-            <p>Hindi Dubbed Episodes</p>
-        </div>
-    </header>
-
     <main>
-        <h2 class="section-title">Episode List</h2>
+        <h2 style="margin-bottom: 30px;">Classroom of the Elite Episodes</h2>
         <div class="anime-grid" id="animeGrid">
-            <p style="color: gray; grid-column: 1/-1; text-align: center;">Checking YouTube for episodes...</p>
+            <p>Loading episodes...</p>
         </div>
     </main>
 
@@ -108,18 +47,12 @@
         <div class="modal-container">
             <span class="close-modal" onclick="closePlayer()">&times;</span>
             <div class="video-wrapper">
-                <iframe id="videoPlayer" src="" allow="autoplay; fullscreen" allowfullscreen></iframe>
+                <iframe id="videoPlayer" src="" allowfullscreen></iframe>
             </div>
-            <h3 id="videoTitle" style="margin-top: 20px; color: var(--primary);"></h3>
         </div>
     </div>
 
-    <footer>
-        <p>&copy; 2024 NamasteOtaku | Legal Streaming</p>
-    </footer>
-
     <script>
-        // YOUR DATA
         const API_KEY = 'AIzaSyDXbfCA2l6LWwg5iURIxbCPCbUlRLGlXWE'; 
         const PLAYLIST_ID = 'PLpm1VVK4UL17x8mbfPIYWRjkCTlrqEWW5'; 
 
@@ -129,29 +62,38 @@
                 const response = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?key=${API_KEY}&playlistId=${PLAYLIST_ID}&part=snippet&maxResults=50`);
                 const data = await response.json();
 
-                // Check for Errors and alert the user
                 if (data.error) {
-                    alert("YouTube Error: " + data.error.message);
-                    grid.innerHTML = `<p style="color:red">Error: ${data.error.message}</p>`;
+                    alert("API Error: " + data.error.message);
                     return;
                 }
 
-                if (data.items && data.items.length > 0) {
+                if (data.items) {
                     grid.innerHTML = data.items.map(item => {
                         const videoId = item.snippet.resourceId.videoId;
                         const title = item.snippet.title;
-                        const thumb = item.snippet.thumbnails.high.url;
+                        
+                        // SAFETY FIX: Check if thumbnail exists, otherwise use a placeholder image
+                        let thumb = "https://via.placeholder.com/300x450?text=No+Thumbnail";
+                        if (item.snippet.thumbnails && item.snippet.thumbnails.high) {
+                            thumb = item.snippet.thumbnails.high.url;
+                        } else if (item.snippet.thumbnails && item.snippet.thumbnails.default) {
+                            thumb = item.snippet.thumbnails.default.url;
+                        }
+
+                        // Skip deleted or private videos (their title usually starts with "Deleted video" or "Private video")
+                        if (title === "Deleted video" || title === "Private video") {
+                            return ""; 
+                        }
+
                         return `
-                            <div class="anime-card" onclick="openPlayer('${videoId}', '${title.replace(/'/g, "&apos;")}')">
-                                <img src="${thumb}" alt="Anime" loading="lazy">
+                            <div class="anime-card" onclick="openPlayer('${videoId}')">
+                                <img src="${thumb}" alt="Anime Episode">
                                 <div class="card-info">
                                     <h3>${title}</h3>
                                 </div>
                             </div>
                         `;
                     }).join('');
-                } else {
-                    grid.innerHTML = "<p>No episodes found. Make sure the YouTube playlist is PUBLIC.</p>";
                 }
             } catch (error) {
                 alert("Connection Failed: " + error);
@@ -160,24 +102,17 @@
 
         const modal = document.getElementById('videoModal');
         const player = document.getElementById('videoPlayer');
-        const vTitle = document.getElementById('videoTitle');
 
-        function openPlayer(id, title) {
-            player.src = `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`;
-            vTitle.innerText = title;
+        function openPlayer(id) {
+            player.src = `https://www.youtube.com/embed/${id}?autoplay=1`;
             modal.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
         }
 
         function closePlayer() {
             player.src = "";
             modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
         }
 
-        window.onclick = (e) => { if (e.target == modal) closePlayer(); }
-
-        // Start the fetch
         window.onload = fetchPlaylist;
     </script>
 </body>
