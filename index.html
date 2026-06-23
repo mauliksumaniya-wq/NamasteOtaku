@@ -2,167 +2,264 @@
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NamasteOtaku | Ultimate Shield Player</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>NamasteOtaku | Manga Style Official Portal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;600;900&family=Bangers&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --primary: #ff9933; --bg: #0a0a0b; }
+        :root {
+            --primary: #ffb400; --accent: #00f2ff; --bg-dark: #000;
+            --glass: rgba(10, 10, 12, 0.85); --border: rgba(255, 255, 255, 0.1);
+        }
+
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-        body { background-color: var(--bg); color: white; overflow-x: hidden; }
+        body { background-color: var(--bg-dark); color: white; overflow-x: hidden; }
 
-        nav { padding: 15px 6%; background: #000; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #222; }
-        .logo { font-size: 24px; font-weight: 900; color: var(--primary); }
+        /* --- FEATURE: MANGA PANEL BACKGROUND --- */
+        .manga-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; display: grid; grid-template-columns: repeat(4, 1fr);
+            opacity: 0.3; filter: grayscale(1); pointer-events: none;
+        }
+        .manga-bg img { width: 100%; height: 100%; object-fit: cover; border: 1px solid #111; }
+        .manga-bg img:nth-child(even) { filter: grayscale(0) brightness(0.7); } /* Mixed colored panels */
 
-        main { padding: 20px 6%; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 15px; }
-        .card { background: #111; border-radius: 12px; overflow: hidden; cursor: pointer; aspect-ratio: 2/3; border: 1px solid #222; }
-        .card img { width: 100%; height: 100%; object-fit: cover; }
+        /* --- NAVIGATION --- */
+        nav { 
+            padding: 15px 6%; display: flex; justify-content: space-between; align-items: center; 
+            position: fixed; top: 0; width: 100%; z-index: 5000; 
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-bottom: 1px solid var(--border);
+        }
+        .logo { font-family: 'Bangers', cursive; font-size: 28px; letter-spacing: 2px; color: white; text-decoration: none; }
+        .logo span { color: var(--primary); }
 
-        /* --- THE ULTIMATE SHIELD PLAYER --- */
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 2000; flex-direction: column; justify-content: center; align-items: center; }
+        /* --- MAIN TRANSPARENT CONTAINER --- */
+        .main-container {
+            margin: 100px auto 50px; width: 92%; max-width: 1200px;
+            background: var(--glass); border: 1px solid var(--border);
+            backdrop-filter: blur(40px); border-radius: 30px;
+            padding: 40px; box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+            animation: slideUp 1s ease;
+        }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- CATEGORY TABS --- */
+        .tabs { display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin-bottom: 30px; }
+        .tab { 
+            background: rgba(255,255,255,0.05); padding: 10px 25px; border-radius: 50px; 
+            font-size: 13px; font-weight: 800; cursor: pointer; border: 1px solid var(--border);
+            white-space: nowrap; transition: 0.3s;
+        }
+        .tab.active, .tab:hover { background: var(--primary); color: #000; border-color: var(--primary); transform: scale(1.1); }
+
+        /* --- ANIME GRID --- */
+        .section-title { font-family: 'Bangers', cursive; font-size: 32px; color: var(--primary); margin-bottom: 25px; letter-spacing: 1px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 20px; }
         
-        .player-container {
-            width: 100%; max-width: 900px;
-            aspect-ratio: 16/9;
-            position: relative;
-            overflow: hidden;
-            background: #000;
+        .card { 
+            background: #000; border-radius: 15px; overflow: hidden; aspect-ratio: 2/3; 
+            position: relative; border: 2px solid transparent; transition: 0.5s; cursor: pointer;
         }
-
-        #ytPlayer {
-            position: absolute;
-            top: -12%; /* Title Hide */
-            left: -1%;
-            width: 102%;
-            height: 124%;
-            border: none;
+        .card:hover { border-color: var(--primary); transform: translateY(-10px) rotate(2deg); }
+        .card img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .card:hover img { transform: scale(1.1); filter: brightness(0.6); }
+        
+        .card-info { 
+            position: absolute; bottom: 0; width: 100%; padding: 15px; 
+            background: linear-gradient(transparent, black); text-align: center;
         }
+        .card-info h3 { font-size: 13px; font-weight: 900; text-transform: uppercase; }
 
-        /* लेयर 1: ऊपर का हिस्सा (Title/Channel) छिपाने के लिए */
-        .mask-top { position: absolute; top: 0; left: 0; width: 100%; height: 55px; background: #000; z-index: 100; }
-
-        /* लेयर 2: नीचे बाईं ओर का लोगो (YouTube Logo) छिपाने के लिए */
-        .mask-logo { position: absolute; bottom: 0; left: 0; width: 150px; height: 50px; background: #000; z-index: 100; pointer-events: none; }
-
-        /* लेयर 3: 'More Videos' शील्ड (वीडियो एंड होने पर दिखेगी) */
-        #endShield {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 500;
-            display: none; flex-direction: column; justify-content: center; align-items: center;
+        /* --- LEGAL DRAWERS --- */
+        .drawer { 
+            position: fixed; bottom: -100%; left: 0; width: 100%; height: 90vh; 
+            background: rgba(5, 5, 6, 0.98); backdrop-filter: blur(50px); 
+            z-index: 6000; border-radius: 40px 40px 0 0; transition: 0.6s cubic-bezier(0.19, 1, 0.22, 1); 
+            padding: 40px 8%; overflow-y: auto; border-top: 2px solid var(--primary);
         }
+        .drawer.active { bottom: 0; }
+        .close-btn { float: right; font-size: 40px; cursor: pointer; color: var(--primary); }
 
-        /* कंट्रोल बार */
-        .controls {
-            width: 100%; max-width: 900px; background: #111; padding: 15px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-radius: 0 0 10px 10px; z-index: 1000;
-        }
+        /* --- PLAYER --- */
+        .player-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 7000; justify-content: center; align-items: center; }
+        .viewport { width: 100%; max-width: 1000px; aspect-ratio: 16/9; overflow: hidden; position: relative; background: #000; }
+        #mainPlayer { position: absolute; top: -12%; left: -2%; width: 104%; height: 125%; border: none; }
 
-        .btn { background: var(--primary); color: black; border: none; padding: 8px 20px; border-radius: 5px; font-weight: 800; cursor: pointer; }
-        .close-p { margin-top: 20px; color: #444; cursor: pointer; font-size: 12px; font-weight: 800; }
+        footer { padding: 40px 5%; text-align: center; color: #444; font-size: 12px; }
+        .footer-links { margin-bottom: 15px; display: flex; justify-content: center; gap: 20px; }
+        .footer-links span { cursor: pointer; font-weight: 800; transition: 0.3s; }
+        .footer-links span:hover { color: var(--primary); }
+
+        @media (max-width: 600px) { .grid { grid-template-columns: repeat(2, 1fr); } .main-container { padding: 20px; } }
     </style>
 </head>
 <body>
 
-    <nav><div class="logo">NAMASTE<span>OTAKU</span></div></nav>
-
-    <main><div id="animeGrid" class="grid"></div></main>
-
-    <!-- Modal Player -->
-    <div class="modal" id="videoModal">
-        <div class="player-container">
-            <div class="mask-top"></div> <!-- Hide Title -->
-            <div class="mask-logo"></div> <!-- Hide YouTube Logo -->
-            
-            <div id="ytPlayer"></div> <!-- API Player -->
-
-            <!-- End Screen Shield -->
-            <div id="endShield">
-                <h2 style="margin-bottom: 20px;">Episode Finished</h2>
-                <button class="btn" onclick="location.reload()">WATCH AGAIN</button>
-            </div>
-        </div>
-
-        <div class="controls">
-            <button class="btn" id="playBtn">PAUSE</button>
-            <span id="stat" style="font-size: 12px; color: #555;">LEGAL STREAMING MODE</span>
-        </div>
-        
-        <div class="close-p" onclick="closePlayer()">CLOSE PLAYER</div>
+    <!-- Background Manga Panels -->
+    <div class="manga-bg">
+        <img src="https://wallpapers.com/images/hd/aesthetic-manga-panels-9vghr292040y1lpt.jpg">
+        <img src="https://wallpapercave.com/wp/wp8524458.jpg">
+        <img src="https://i.pinimg.com/736x/88/54/10/88541097c0f167e43689408434771f25.jpg">
+        <img src="https://wallpaperaccess.com/full/5643440.jpg">
     </div>
 
-    <script src="https://www.youtube.com/iframe_api"></script>
+    <nav>
+        <a href="#" class="logo">NAMASTE<span>OTAKU</span></a>
+        <div style="font-size: 10px; font-weight: 900; color: var(--accent);">AUTO-EVOLUTION</div>
+    </nav>
+
+    <div class="main-container">
+        <!-- Automatic Category Tabs -->
+        <div class="tabs">
+            <div class="tab active" onclick="fetchPopular()">⭐ POPULAR CLASSICS</div>
+            <div class="tab" onclick="fetchHindi()">🇮🇳 HINDI DUBBED</div>
+            <div class="tab" onclick="fetchByGenre(1)">🔥 ACTION</div>
+            <div class="tab" onclick="fetchByGenre(22)">💖 ROMANCE</div>
+            <div class="tab" onclick="fetchByGenre(10)">🐉 FANTASY</div>
+            <div class="tab" onclick="fetchTrending()">🚀 NEW SEASON</div>
+        </div>
+
+        <h2 class="section-title" id="gridTitle">Popular Anime</h2>
+        <div class="grid" id="mainGrid">
+            <!-- Data will load here -->
+        </div>
+
+        <!-- Ad Slot -->
+        <div style="background: rgba(255,255,255,0.02); border: 1px dashed #333; padding: 40px; text-align: center; margin-top: 40px; border-radius: 20px; color: #444; font-size: 11px; letter-spacing: 5px;">
+            GOOGLE ADSENSE TERMINAL
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-links">
+            <span onclick="openLegal('about')">About</span>
+            <span onclick="openLegal('privacy')">Privacy</span>
+            <span onclick="openLegal('dmca')">Disclaimer</span>
+            <span onclick="openLegal('contact')">Contact</span>
+        </div>
+        <p>© 2024 NAMASTEOTAKU. POWERED BY MANGA ENGINE.</p>
+    </footer>
+
+    <!-- Legal Drawer -->
+    <div id="legalDrawer" class="drawer">
+        <span class="close-btn" onclick="closeDrawer('legalDrawer')">&times;</span>
+        <div id="legalContent" style="padding-top:20px; line-height:1.8;"></div>
+    </div>
+
+    <!-- Detail Drawer -->
+    <div id="detailDrawer" class="drawer">
+        <span class="close-btn" onclick="closeDrawer('detailDrawer')">&times;</span>
+        <div id="drawerData"></div>
+    </div>
+
+    <!-- Protected Player -->
+    <div class="player-modal" id="playerModal">
+        <div class="viewport">
+            <iframe id="mainPlayer" src="" allow="autoplay; fullscreen"></iframe>
+        </div>
+        <div style="margin-top:30px; color:var(--primary); font-weight:900; cursor:pointer; letter-spacing:5px;" onclick="closePlayer()">TAP TO EXIT</div>
+    </div>
 
     <script>
-        const API_KEY = 'AIzaSyDXbfCA2l6LWwg5iURIxbCPCbUlRLGlXWE'; 
-        const animeDB = [
-            { name: "Classroom of the Elite", id: "PLpm1VVK4UL17x8mbfPIYWRjkCTlrqEWW5" },
-            { name: "One-Punch Man", id: "PLpm1VVK4UL14XTDA9wPpCC6zKB2jUh9vY" }
-        ];
+        const YT_KEY = 'AIzaSyDXbfCA2l6LWwg5iURIxbCPCbUlRLGlXWE';
+        const API_BASE = "https://api.jikan.moe/v4";
+        const HINDI_CID = 'UC_9baW9P6oFm9ZisY_7E6PA';
 
-        let player;
-        
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('ytPlayer', {
-                height: '100%',
-                width: '100%',
-                playerVars: {
-                    'autoplay': 0,
-                    'controls': 1, // Skip Ad के लिए ऑन रखना पड़ेगा
-                    'modestbranding': 1,
-                    'rel': 0,
-                    'showinfo': 0,
-                    'iv_load_policy': 3
-                },
-                events: {
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-
-        function onPlayerStateChange(event) {
-            const shield = document.getElementById('endShield');
-            // अगर वीडियो खत्म हो गया (State = 0)
-            if (event.data == YT.PlayerState.ENDED) {
-                shield.style.display = 'flex'; // 'More Videos' को ब्लॉक करें
-            } else {
-                shield.style.display = 'none';
-            }
-        }
+        let animeCache = [];
 
         async function init() {
-            const grid = document.getElementById('animeGrid');
-            for (const anime of animeDB) {
-                const res = await fetch(`https://api.jikan.moe/v4/anime?q=${anime.name}&limit=1`);
-                const data = await res.json();
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.onclick = () => loadEpisodes(anime.id);
-                card.innerHTML = `<img src="${data.data[0].images.webp.large_image_url}">`;
-                grid.appendChild(card);
-            }
+            fetchPopular();
         }
 
-        async function loadEpisodes(pid) {
-            const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?key=${API_KEY}&playlistId=${pid}&part=snippet&maxResults=10`);
+        // --- 1. LEGAL CONTENT (For AdSense) ---
+        const legalData = {
+            about: `<h2 style="color:var(--primary)">About Us</h2><p>NamasteOtaku is a premium legal anime discovery platform. We provide Indian fans with a clean, manga-inspired interface to discover their favorite anime in Hindi and English via official APIs.</p>`,
+            privacy: `<h2 style="color:var(--primary)">Privacy Policy</h2><p>We do not store user data. We use Google AdSense and Analytics to improve user experience. Your browsing stays safe and anonymous.</p>`,
+            dmca: `<h2 style="color:var(--primary)">Disclaimer / DMCA</h2><p>NamasteOtaku is an aggregator. We do not host any copyrighted files. All videos are embedded directly from official verified YouTube channels like Crunchyroll India. If you have any copyright concerns, please contact the host platform.</p>`,
+            contact: `<h2 style="color:var(--primary)">Contact Us</h2><p>For support or feedback, email us at: <b>admin@namasteotaku.com</b></p>`
+        };
+
+        function openLegal(p) {
+            document.getElementById('legalContent').innerHTML = legalData[p];
+            document.getElementById('legalDrawer').classList.add('active');
+        }
+
+        // --- 2. DATA FETCHING (AUTOMATIC) ---
+        async function fetchPopular() {
+            // Manual search for Classics first for better accuracy
+            const classics = ["Naruto", "One Piece", "Dragon Ball Z", "Bleach", "Hunter x Hunter"];
+            const grid = document.getElementById('mainGrid');
+            grid.innerHTML = "<p>Opening Manga Vault...</p>";
+            document.getElementById('gridTitle').innerText = "Popular Classics";
+            
+            let html = "";
+            for(let name of classics) {
+                const res = await fetch(`${API_BASE}/anime?q=${name}&limit=1`);
+                const data = await res.json();
+                if(data.data[0]) {
+                    animeCache.push(data.data[0]);
+                    html += renderCard(data.data[0]);
+                }
+            }
+            grid.innerHTML = html;
+        }
+
+        async function fetchHindi() {
+            try {
+                const res = await fetch(`https://www.googleapis.com/youtube/v3/search?key=${YT_KEY}&channelId=${HINDI_CID}&part=snippet&order=date&maxResults=10&q=Hindi`);
+                const data = await res.json();
+                document.getElementById('gridTitle').innerText = "Official Hindi Dubs";
+                document.getElementById('mainGrid').innerHTML = data.items.map(v => `
+                    <div class="card" onclick="openPlayer('${v.id.videoId}')">
+                        <img src="${v.snippet.thumbnails.high.url}">
+                        <div class="card-info"><h3>${v.snippet.title.substring(0,30)}...</h3></div>
+                    </div>
+                `).join('');
+            } catch(e) {}
+        }
+
+        async function fetchByGenre(id) {
+            document.getElementById('mainGrid').innerHTML = "Filtering...";
+            const res = await fetch(`${API_BASE}/anime?genres=${id}&order_by=score&sort=desc&limit=12`);
             const data = await res.json();
-            openPlayer(data.items[0].snippet.resourceId.videoId);
+            animeCache = [...animeCache, ...data.data];
+            document.getElementById('mainGrid').innerHTML = data.data.map(a => renderCard(a)).join('');
+            document.getElementById('gridTitle').innerText = "Top in Category";
+        }
+
+        async function fetchTrending() {
+            const res = await fetch(`${API_BASE}/seasons/now?limit=12`);
+            const data = await res.json();
+            animeCache = [...animeCache, ...data.data];
+            document.getElementById('mainGrid').innerHTML = data.data.map(a => renderCard(a)).join('');
+            document.getElementById('gridTitle').innerText = "New Airing Now";
+        }
+
+        function renderCard(a) {
+            return `<div class="card" onclick="openDetails(${a.mal_id})"><img src="${a.images.jpg.image_url}"><div class="card-info"><h3>${a.title}</h3></div></div>`;
+        }
+
+        // --- 3. UI LOGIC ---
+        async function openDetails(id) {
+            const a = animeCache.find(x => x.mal_id == id) || (await (await fetch(`${API_BASE}/anime/${id}`)).json()).data;
+            document.getElementById('drawerData').innerHTML = `
+                <img src="${a.images.jpg.large_image_url}" style="width:100%; max-width:300px; border-radius:20px; box-shadow:0 10px 40px #000;">
+                <h2 style="color:var(--primary); font-size:35px; margin-top:20px; font-family:'Bangers', cursive;">${a.title}</h2>
+                <p style="color:var(--accent); font-weight:900; margin:10px 0;">⭐ SCORE: ${a.score}</p>
+                <p style="color:#aaa; line-height:1.6; font-size:15px;">${a.synopsis || 'Description loading...'}</p>
+                <a href="${a.url}" target="_blank" style="display:block; text-align:center; background:white; color:black; padding:18px; border-radius:10px; font-weight:900; text-decoration:none; margin-top:30px;">OPEN OFFICIAL SOURCE</a>
+            `;
+            document.getElementById('detailDrawer').classList.add('active');
         }
 
         function openPlayer(id) {
-            document.getElementById('videoModal').style.display = 'flex';
-            player.loadVideoById(id);
+            document.getElementById('mainPlayer').src = `https://www.youtube.com/embed/${id}?autoplay=1&modestbranding=1&rel=0&controls=1`;
+            document.getElementById('playerModal').style.display = 'flex';
         }
 
-        document.getElementById('playBtn').onclick = () => {
-            if (player.getPlayerState() == 1) player.pauseVideo();
-            else player.playVideo();
-        };
-
-        function closePlayer() {
-            player.stopVideo();
-            document.getElementById('videoModal').style.display = 'none';
-        }
+        function closePlayer() { document.getElementById('mainPlayer').src = ""; document.getElementById('playerModal').style.display = 'none'; }
+        function closeDrawer(id) { document.getElementById(id).classList.remove('active'); }
 
         window.onload = init;
     </script>
